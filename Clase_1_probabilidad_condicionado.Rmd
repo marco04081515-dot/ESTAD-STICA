@@ -1,0 +1,134 @@
+---
+title: "Clase_1_Prob_Condicionada"
+author: "Marco Diaz"
+date: "2025-10-02"
+output: word_document
+---
+```{r}
+
+############################################################
+# EJEMPLO 1: Probabilidad Condicionada en Tablas de Contingencia
+############################################################
+#Encuesta : Fumar y Enfermedad
+#- 40 fumadores , 60 no fumadores
+#- Entre los que fuman, hay 10 enfermos
+#- Entre los que no fuman, 5 enfermos.
+
+
+# Creamos una matriz con los datos de una encuesta
+# matrix() sirve para crear tablas con filas y columnas
+tabla <- matrix(c(10, 30, # Fumadores: enfermos, sanos
+5, 55), # No fumadores: enfermos, sanos
+nrow = 2, byrow = TRUE)
+
+# colnames() y rownames() asignan nombres a columnas y filas
+colnames(tabla) <- c("Enfermo", "Sano")
+rownames(tabla) <- c("Fumador", "No Fumador")
+
+print("Tabla de contingencia:")
+print(tabla)
+## print(tabla[2,"Enfermo"]) controlar que imprime correctamente 
+
+# sum() sirve para sumar los elementos de un vector o tabla
+# Calculamos probabilidad total de enfermos
+p_enfermo <- sum(tabla[, "Enfermo"]) / sum(tabla)
+
+# Accedemos a un valor específico de la tabla con fila y columna
+# tabla["Fumador", "Enfermo"] selecciona el valor de esa casilla
+p_enfermo_dado_fumador <- tabla["Fumador", "Enfermo"] / sum(tabla["Fumador", ])
+
+p_enfermo_dado_no_fumador1 <- tabla["No Fumador", "Enfermo"] / sum(tabla["No Fumador", ])
+
+# cat() se usa para imprimir texto y resultados en pantalla
+cat("\n--- RESULTADOS ---\n")
+cat("P(Enfermo) =", round(p_enfermo,3), "\n")
+cat("P(Enfermo | Fumador) =", round(p_enfermo_dado_fumador,3), "\n")
+cat("P(Enfermo | No Fumador) =", round(p_enfermo_dado_no_fumador1,3), "\n")
+
+############################################################
+# EJEMPLO 2: Simulación Monte Carlo
+############################################################
+# Queremos calcular P(As | Roja) en una baraja de 52 cartas
+
+set.seed(123) # Fija la semilla para que los resultados sean reproducibles
+n <- 1e5 # Número de simulaciones (100,000)
+
+# rep() repite un valor varias veces
+palos <- rep(c("Corazones", "Diamantes", "Tréboles", "Picas"), each = 13)
+valores <- rep(1:13, times = 4) # 1=As
+
+# Creamos un data.frame (tabla con variables)
+mazo <- data.frame(valor = valores, palo = palos)
+
+# replicate() repite una operación muchas veces
+simulaciones <- replicate(n, {
+# sample() selecciona al azar elementos de un vector
+carta <- mazo[sample(1:52, 1), ] # elegir 1 carta
+return(carta)
+}, simplify = FALSE)
+
+# do.call(rbind, ...) une todas las cartas simuladas en una sola tabla
+simulaciones <- do.call(rbind, simulaciones)
+
+# Condición: carta roja
+condicion_roja <- simulaciones$palo %in% c("Corazones", "Diamantes")
+print(mean(condicion_roja))
+
+# mean() calcula el promedio (en probabilidad = frecuencia relativa)
+prob_as_dado_roja <- mean(simulaciones$valor == 1 & condicion_roja) / mean(condicion_roja)
+
+cat("\nProbabilidad de As dado que es Roja =", round(prob_as_dado_roja,3), "\n")
+
+
+
+############################################################
+# EJEMPLO 3: Teorema de Bayes
+############################################################
+# Usamos directamente fórmulas matemáticas
+
+p_enfermo <- 0.01
+p_sano <- 0.99
+sensibilidad <- 0.95
+especificidad <- 0.90
+
+# Probabilidad de positivo en un sano = 1 - especificidad
+p_positivo_dado_sano <- 1 - especificidad
+
+# Probabilidad total de positivo
+p_positivo <- (sensibilidad * p_enfermo) + (p_positivo_dado_sano * p_sano)
+
+# Fórmula de Bayes
+p_enfermo_dado_positivo <- (sensibilidad * p_enfermo) / p_positivo
+
+cat("\nProbabilidad de estar enfermo dado que el test es positivo =",
+round(p_enfermo_dado_positivo,3), "\n")
+
+
+############################################################
+# EJERCICIOS PROPUESTOS PARA LOS ESTUDIANTES
+############################################################
+
+cat("\n=============================\n")
+cat("EJERCICIOS PROPUESTOS\n")
+cat("=============================\n")
+
+# Ejercicio 1
+cat("\n1) Se lanzan dos dados. Calcular P(suma = 8 | el primer dado es 3).\n")
+
+# Ejercicio 2
+cat("\n2) En una baraja de 52 cartas, calcular P(reina | figura).\n")
+
+# Ejercicio 3
+cat("\n3) Una encuesta muestra:\n")
+cat(" - 30% estudiantes practican deporte, de ellos 20% suspenden.\n")
+cat(" - 70% no practican deporte, de ellos 40% suspenden.\n")
+cat(" Calcular P(suspender | practica deporte).\n")
+
+# Ejercicio 4
+cat("\n4) En un aeropuerto el detector de metales:\n")
+cat(" - Detecta armas con prob. 98%.\n")
+cat(" - Da falso positivo en 5%.\n")
+cat(" - Sólo 0.2% de los pasajeros lleva arma.\n")
+cat(" Calcular probabilidad de que una persona lleve arma dado que el detector suena.\n")
+```
+

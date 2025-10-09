@@ -1,0 +1,81 @@
+---
+title: "Clase_2_Simulaciones"
+author: "Marco Diaz"
+date: "2025-10-09"
+output: html_document
+---
+Consideramos el experimento de Bernoulli consistente en el lanzamiento de una moneda.
+
+1. Empleando la función sample, obtener 1000 simulaciones del lanzamiento de una moneda (0 = cruz, 1 = cara), suponiendo que no está trucada. Aproximar la probabilidad de cara a partir de las simulaciones.
+
+2. En R pueden generarse valores de la distribución de Bernoulli mediante la función rbinom(nsim, size=1, prob). Generar un gráfico de lineas considerando en el eje  X el número de lanzamientos (de 1 a 10000) y en el eje  Y la frecuencia relativa del suceso cara (puede ser recomendable emplear la función cumsum).
+```{r}
+set.seed(1)
+nsim<- 1000
+cara=1
+cruz=0
+p<- 0.4
+x<- sample(c(cara,cruz),nsim,replace=TRUE,prob=c(0.5,0.5))
+mean(x)
+
+x2<- rbinom(nsim,1,p)
+mean(x2)
+
+n<-1:nsim
+plot(n,cumsum(x2)/n,type="l",ylab="Proporción de caras",xlab="Nº lanzamientos",ylim=c(0,1))
+abline(h=p, lty=2, col="red")
+
+#2
+
+```
+PROBLEMA 2 .- En 1651, el Caballero de Méré le planteó a Pascal una pregunta relacionada con las apuestas y los juegos de azar: ¿es ventajoso apostar a que en cuatro lanzamientos de un dado se obtiene al menos un seis? 
+Este problema generó una fructífera correspondencia entre Pascal y Fermat que se considera, simbólicamente, como el nacimiento del Cálculo de Probabilidades.
+```{r}
+#  Escribir una función que simule el lanzamiento de  n dados. El parámetro de entrada es el número de lanzamientos  n , que toma el valor 4 por defecto, y la salida debe ser TRUE si se obtiene al menos un 6 y FALSE en caso contrario.
+
+dados <- function(n=4){
+  lanzamientos<- sample(1:6,n,replace=TRUE)
+  return(6 %in% lanzamientos)
+}
+
+# Simula 10000 jugadas y calcula la proporción de veces que se gana la apuesta con n=4. compara con el resultado teórico de 1-(5/6)^n
+
+set.seed(1)
+n<-4
+nsim<- 10000
+mean(replicate(nsim,dados(n)))
+
+1-(5/6)^n
+```
+Un jugador de baloncesto lanza tiros libres con una probabilidad de acierto de 0.75.
+Queremos estimar mediante simulación Monte Carlo la probabilidad de que:
+
+el jugador enceste al menos 8 de 10 tiros libres.
+
+```{r}
+set.seed(123)
+encesta=1
+falla=0
+jugador<- function(n){
+  canastas <-sample(c(encesta,falla),n,replace=TRUE,c(0.75,0.25))
+  return(sum(canastas&encesta==1)>8)}
+jugador(10)
+
+```
+```{r}
+set.seed(123)
+n_sim=10000
+prob_encestar=0.75
+
+tiros <- replicate(n_sim,{lanzador<-rbinom(1,size=10,prob_encestar)
+return(lanzador)})
+
+prob_almenos_8<- mean(tiros>=8)
+print(prob_almenos_8)
+```
+
+
+
+
+
+
